@@ -1,0 +1,39 @@
+name: GitHub Classroom Workflow
+
+on: [push]
+
+jobs:
+
+  autograding:
+
+    runs-on: ubuntu-latest
+
+    services:
+
+      mysql:
+
+        image: mysql:8
+
+        env:
+          MYSQL_ROOT_PASSWORD: root
+
+        ports:
+          - 3306:3306
+
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - run: sleep 20
+
+    - name: Run SQL
+      run: mysql -h127.0.0.1 -uroot -proot < tests/test.sql
+
+    - name: Grade
+      run: echo "Assignment Passed"
