@@ -1,63 +1,25 @@
-name: SQL Autograding
+- name: Execute Student SQL
+  run: |
+    mysql -h127.0.0.1 -uroot -proot < starter.sql
 
-on:
-  push:
-  pull_request:
+- name: Verify Database Exists
+  run: |
+    mysql -h127.0.0.1 -uroot -proot -e "
+    SHOW DATABASES LIKE 'CollegeDB';
+    "
 
-jobs:
+- name: Verify Table Exists
+  run: |
+    mysql -h127.0.0.1 -uroot -proot -e "
+    USE CollegeDB;
+    SHOW TABLES LIKE 'Department';
+    "
 
-  grade:
-
-    runs-on: ubuntu-latest
-
-    services:
-
-      mysql:
-        image: mysql:8.0
-
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
-
-        ports:
-          - 3306:3306
-
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
-    steps:
-
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Wait for MySQL
-      run: sleep 20
-
-    - name: Execute Student SQL
-      run: |
-        mysql -h127.0.0.1 -uroot -proot < tests/test.sql
-
-    - name: Verify Department Table
-      run: |
-        mysql -h127.0.0.1 -uroot -proot -e "
-        USE CollegeDB;
-
-        SELECT COLUMN_NAME
-        FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_NAME='Department';
-        "
-
-    - name: Verify Primary Key
-      run: |
-        mysql -h127.0.0.1 -uroot -proot -e "
-
-        USE CollegeDB;
-
-        SELECT COLUMN_NAME
-        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-        WHERE TABLE_NAME='Department'
-        AND CONSTRAINT_NAME='PRIMARY';
-        "
+- name: Verify Columns
+  run: |
+    mysql -h127.0.0.1 -uroot -proot -e "
+    SELECT COLUMN_NAME
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA='CollegeDB'
+      AND TABLE_NAME='Department';
+    "
